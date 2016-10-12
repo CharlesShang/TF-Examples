@@ -6,3 +6,5 @@
 checkpoint
 ResNet-L*.ckpt
 ResNet-L*.meta
+logs/
+data/cifar-data/
