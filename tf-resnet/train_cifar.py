@@ -288,8 +288,8 @@ def maybe_download_and_extract():
 def main(argv=None):  # pylint: disable=unused-argument
     maybe_download_and_extract()
 
-    # different input behaviors for training and testing 
-    # via seperated ops.
+    # different input behaviors for training and testing
+    # via seperated ops
     # At training, distorted_input shuffles, distorts, and augments training set
     # At testing, inputs just normally reads in testing set.
     # Then, use a is_training tensor to switch between the two branches.
