@@ -21,6 +21,7 @@ from __future__ import print_function
 import os
 import sys
 import tarfile
+import urllib
 
 from resnet_train import train
 from resnet import inference_small
@@ -287,7 +288,7 @@ def maybe_download_and_extract():
 def main(argv=None):  # pylint: disable=unused-argument
     maybe_download_and_extract()
 
-    # different input behaviors for training and testing
+    # different input behaviors for training and testing 
     # via seperated ops.
     # At training, distorted_input shuffles, distorts, and augments training set
     # At testing, inputs just normally reads in testing set.
