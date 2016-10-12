@@ -6,6 +6,6 @@
 checkpoint
 ResNet-L*.ckpt
 ResNet-L*.meta
-./tf-resnet/logs/
-./tf-resnet/data/cifar-data/
-./tf-resnet/.idea
+tf-resnet/logs/
+tf-resnet/data/cifar-data
+tf-resnet/.idea
