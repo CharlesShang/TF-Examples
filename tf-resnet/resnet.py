@@ -147,7 +147,8 @@ def _imagenet_preprocess(rgb):
 def loss(logits, labels):
     cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits, labels)
     cross_entropy_mean = tf.reduce_mean(cross_entropy)
- 
+
+    # must add regularization manually
     regularization_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
 
     loss_ = tf.add_n([cross_entropy_mean] + regularization_losses)
@@ -301,6 +302,9 @@ def _get_variable(name,
     else:
         regularizer = None
     collections = [tf.GraphKeys.VARIABLES, RESNET_VARIABLES]
+
+    # create a new var or get the existing on with these param
+    # NOTE: set regularization here, then manually add it to loss
     return tf.get_variable(name,
                            shape=shape,
                            initializer=initializer,
