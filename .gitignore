@@ -9,3 +9,4 @@ ResNet-L*.meta
 tf-resnet/logs/
 tf-resnet/data/cifar-data
 tf-resnet/.idea
+.idea
