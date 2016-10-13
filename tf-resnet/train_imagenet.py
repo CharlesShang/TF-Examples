@@ -61,11 +61,14 @@ def load_data(data_dir):
 def distorted_inputs():
     data = load_data(FLAGS.data_dir)
 
+    # load the file list and labels
     filenames = [ d['filename'] for d in data ]
     label_indexes = [ d['label_index'] for d in data ]
 
+    # slice_input_producer return tensors
     filename, label_index = tf.train.slice_input_producer([filenames, label_indexes], shuffle=True)
 
+    # create multiple processes to read the data
     num_preprocess_threads = 4
     images_and_labels = []
     for thread_id in range(num_preprocess_threads):
@@ -76,6 +79,7 @@ def distorted_inputs():
         image = image_preprocessing(image_buffer, bbox, train, thread_id)
         images_and_labels.append([image, label_index])
 
+    # create batches
     images, label_index_batch = tf.train.batch_join(
         images_and_labels,
         batch_size=FLAGS.batch_size,
