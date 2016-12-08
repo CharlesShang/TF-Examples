@@ -107,6 +107,7 @@ def load_caffe(img_p, layers=50):
 
     prototxt = "data/ResNet-%d-deploy.prototxt" % layers
     caffemodel = "data/ResNet-%d-model.caffemodel" % layers
+    # net = caffe.Net(prototxt, caffe.TEST)
     net = caffe.Net(prototxt, caffemodel, caffe.TEST)
 
     net.blobs['data'].data[0] = img_p.transpose((2, 0, 1))
@@ -316,6 +317,309 @@ def save_graph(save_path):
 
     print "saved model to %s" % save_path
 
+def truncate_layer(graph, layers):
+    """
+    :param graph:
+    :param img:
+    :param img_p:
+    :param layers:
+    :return:
+    """
+    if layers == 50:
+        num_blocks = [3, 4, 6, 3]
+    elif layers == 101:
+        num_blocks = [3, 4, 23, 3]
+    elif layers == 152:
+        num_blocks = [3, 8, 36, 3]
+    with tf.device('/cpu:0'):
+        images = tf.placeholder("float32", [None, 224, 224, 3], name="images")
+        logits = resnet.inference(images,
+                                  is_training=True,
+                                  num_blocks=num_blocks,
+                                  bottleneck=True)
+        prob = tf.nn.softmax(logits, name='prob')
+    # tf.train.export_meta_graph(filename=meta_fn(layers))
+    saver_dict = {}
+    for t in tf.all_variables():
+        if t.name.startswith('scale'):
+            saver_dict[t.name] = t
+            print t.name
+
+    """
+    scale1/weights:0
+scale1/beta:0
+scale1/gamma:0
+scale1/moving_mean:0
+scale1/moving_variance:0
+scale2/block1/a/weights:0
+scale2/block1/a/beta:0
+scale2/block1/a/gamma:0
+scale2/block1/a/moving_mean:0
+scale2/block1/a/moving_variance:0
+scale2/block1/b/weights:0
+scale2/block1/b/beta:0
+scale2/block1/b/gamma:0
+scale2/block1/b/moving_mean:0
+scale2/block1/b/moving_variance:0
+scale2/block1/c/weights:0
+scale2/block1/c/beta:0
+scale2/block1/c/gamma:0
+scale2/block1/c/moving_mean:0
+scale2/block1/c/moving_variance:0
+scale2/block1/shortcut/weights:0
+scale2/block1/shortcut/beta:0
+scale2/block1/shortcut/gamma:0
+scale2/block1/shortcut/moving_mean:0
+scale2/block1/shortcut/moving_variance:0
+scale2/block2/a/weights:0
+scale2/block2/a/beta:0
+scale2/block2/a/gamma:0
+scale2/block2/a/moving_mean:0
+scale2/block2/a/moving_variance:0
+scale2/block2/b/weights:0
+scale2/block2/b/beta:0
+scale2/block2/b/gamma:0
+scale2/block2/b/moving_mean:0
+scale2/block2/b/moving_variance:0
+scale2/block2/c/weights:0
+scale2/block2/c/beta:0
+scale2/block2/c/gamma:0
+scale2/block2/c/moving_mean:0
+scale2/block2/c/moving_variance:0
+scale2/block3/a/weights:0
+scale2/block3/a/beta:0
+scale2/block3/a/gamma:0
+scale2/block3/a/moving_mean:0
+scale2/block3/a/moving_variance:0
+scale2/block3/b/weights:0
+scale2/block3/b/beta:0
+scale2/block3/b/gamma:0
+scale2/block3/b/moving_mean:0
+scale2/block3/b/moving_variance:0
+scale2/block3/c/weights:0
+scale2/block3/c/beta:0
+scale2/block3/c/gamma:0
+scale2/block3/c/moving_mean:0
+scale2/block3/c/moving_variance:0
+scale3/block1/a/weights:0
+scale3/block1/a/beta:0
+scale3/block1/a/gamma:0
+scale3/block1/a/moving_mean:0
+scale3/block1/a/moving_variance:0
+scale3/block1/b/weights:0
+scale3/block1/b/beta:0
+scale3/block1/b/gamma:0
+scale3/block1/b/moving_mean:0
+scale3/block1/b/moving_variance:0
+scale3/block1/c/weights:0
+scale3/block1/c/beta:0
+scale3/block1/c/gamma:0
+scale3/block1/c/moving_mean:0
+scale3/block1/c/moving_variance:0
+scale3/block1/shortcut/weights:0
+scale3/block1/shortcut/beta:0
+scale3/block1/shortcut/gamma:0
+scale3/block1/shortcut/moving_mean:0
+scale3/block1/shortcut/moving_variance:0
+scale3/block2/a/weights:0
+scale3/block2/a/beta:0
+scale3/block2/a/gamma:0
+scale3/block2/a/moving_mean:0
+scale3/block2/a/moving_variance:0
+scale3/block2/b/weights:0
+scale3/block2/b/beta:0
+scale3/block2/b/gamma:0
+scale3/block2/b/moving_mean:0
+scale3/block2/b/moving_variance:0
+scale3/block2/c/weights:0
+scale3/block2/c/beta:0
+scale3/block2/c/gamma:0
+scale3/block2/c/moving_mean:0
+scale3/block2/c/moving_variance:0
+scale3/block3/a/weights:0
+scale3/block3/a/beta:0
+scale3/block3/a/gamma:0
+scale3/block3/a/moving_mean:0
+scale3/block3/a/moving_variance:0
+scale3/block3/b/weights:0
+scale3/block3/b/beta:0
+scale3/block3/b/gamma:0
+scale3/block3/b/moving_mean:0
+scale3/block3/b/moving_variance:0
+scale3/block3/c/weights:0
+scale3/block3/c/beta:0
+scale3/block3/c/gamma:0
+scale3/block3/c/moving_mean:0
+scale3/block3/c/moving_variance:0
+scale3/block4/a/weights:0
+scale3/block4/a/beta:0
+scale3/block4/a/gamma:0
+scale3/block4/a/moving_mean:0
+scale3/block4/a/moving_variance:0
+scale3/block4/b/weights:0
+scale3/block4/b/beta:0
+scale3/block4/b/gamma:0
+scale3/block4/b/moving_mean:0
+scale3/block4/b/moving_variance:0
+scale3/block4/c/weights:0
+scale3/block4/c/beta:0
+scale3/block4/c/gamma:0
+scale3/block4/c/moving_mean:0
+scale3/block4/c/moving_variance:0
+scale4/block1/a/weights:0
+scale4/block1/a/beta:0
+scale4/block1/a/gamma:0
+scale4/block1/a/moving_mean:0
+scale4/block1/a/moving_variance:0
+scale4/block1/b/weights:0
+scale4/block1/b/beta:0
+scale4/block1/b/gamma:0
+scale4/block1/b/moving_mean:0
+scale4/block1/b/moving_variance:0
+scale4/block1/c/weights:0
+scale4/block1/c/beta:0
+scale4/block1/c/gamma:0
+scale4/block1/c/moving_mean:0
+scale4/block1/c/moving_variance:0
+scale4/block1/shortcut/weights:0
+scale4/block1/shortcut/beta:0
+scale4/block1/shortcut/gamma:0
+scale4/block1/shortcut/moving_mean:0
+scale4/block1/shortcut/moving_variance:0
+scale4/block2/a/weights:0
+scale4/block2/a/beta:0
+scale4/block2/a/gamma:0
+scale4/block2/a/moving_mean:0
+scale4/block2/a/moving_variance:0
+scale4/block2/b/weights:0
+scale4/block2/b/beta:0
+scale4/block2/b/gamma:0
+scale4/block2/b/moving_mean:0
+scale4/block2/b/moving_variance:0
+scale4/block2/c/weights:0
+scale4/block2/c/beta:0
+scale4/block2/c/gamma:0
+scale4/block2/c/moving_mean:0
+scale4/block2/c/moving_variance:0
+scale4/block3/a/weights:0
+scale4/block3/a/beta:0
+scale4/block3/a/gamma:0
+scale4/block3/a/moving_mean:0
+scale4/block3/a/moving_variance:0
+scale4/block3/b/weights:0
+scale4/block3/b/beta:0
+scale4/block3/b/gamma:0
+scale4/block3/b/moving_mean:0
+scale4/block3/b/moving_variance:0
+scale4/block3/c/weights:0
+scale4/block3/c/beta:0
+scale4/block3/c/gamma:0
+scale4/block3/c/moving_mean:0
+scale4/block3/c/moving_variance:0
+scale4/block4/a/weights:0
+scale4/block4/a/beta:0
+scale4/block4/a/gamma:0
+scale4/block4/a/moving_mean:0
+scale4/block4/a/moving_variance:0
+scale4/block4/b/weights:0
+scale4/block4/b/beta:0
+scale4/block4/b/gamma:0
+scale4/block4/b/moving_mean:0
+scale4/block4/b/moving_variance:0
+scale4/block4/c/weights:0
+scale4/block4/c/beta:0
+scale4/block4/c/gamma:0
+scale4/block4/c/moving_mean:0
+scale4/block4/c/moving_variance:0
+scale4/block5/a/weights:0
+scale4/block5/a/beta:0
+scale4/block5/a/gamma:0
+scale4/block5/a/moving_mean:0
+scale4/block5/a/moving_variance:0
+scale4/block5/b/weights:0
+scale4/block5/b/beta:0
+scale4/block5/b/gamma:0
+scale4/block5/b/moving_mean:0
+scale4/block5/b/moving_variance:0
+scale4/block5/c/weights:0
+scale4/block5/c/beta:0
+scale4/block5/c/gamma:0
+scale4/block5/c/moving_mean:0
+scale4/block5/c/moving_variance:0
+scale4/block6/a/weights:0
+scale4/block6/a/beta:0
+scale4/block6/a/gamma:0
+scale4/block6/a/moving_mean:0
+scale4/block6/a/moving_variance:0
+scale4/block6/b/weights:0
+scale4/block6/b/beta:0
+scale4/block6/b/gamma:0
+scale4/block6/b/moving_mean:0
+scale4/block6/b/moving_variance:0
+scale4/block6/c/weights:0
+scale4/block6/c/beta:0
+scale4/block6/c/gamma:0
+scale4/block6/c/moving_mean:0
+scale4/block6/c/moving_variance:0
+scale5/block1/a/weights:0
+scale5/block1/a/beta:0
+scale5/block1/a/gamma:0
+scale5/block1/a/moving_mean:0
+scale5/block1/a/moving_variance:0
+scale5/block1/b/weights:0
+scale5/block1/b/beta:0
+scale5/block1/b/gamma:0
+scale5/block1/b/moving_mean:0
+scale5/block1/b/moving_variance:0
+scale5/block1/c/weights:0
+scale5/block1/c/beta:0
+scale5/block1/c/gamma:0
+scale5/block1/c/moving_mean:0
+scale5/block1/c/moving_variance:0
+scale5/block1/shortcut/weights:0
+scale5/block1/shortcut/beta:0
+scale5/block1/shortcut/gamma:0
+scale5/block1/shortcut/moving_mean:0
+scale5/block1/shortcut/moving_variance:0
+scale5/block2/a/weights:0
+scale5/block2/a/beta:0
+scale5/block2/a/gamma:0
+scale5/block2/a/moving_mean:0
+scale5/block2/a/moving_variance:0
+scale5/block2/b/weights:0
+scale5/block2/b/beta:0
+scale5/block2/b/gamma:0
+scale5/block2/b/moving_mean:0
+scale5/block2/b/moving_variance:0
+scale5/block2/c/weights:0
+scale5/block2/c/beta:0
+scale5/block2/c/gamma:0
+scale5/block2/c/moving_mean:0
+scale5/block2/c/moving_variance:0
+scale5/block3/a/weights:0
+scale5/block3/a/beta:0
+scale5/block3/a/gamma:0
+scale5/block3/a/moving_mean:0
+scale5/block3/a/moving_variance:0
+scale5/block3/b/weights:0
+scale5/block3/b/beta:0
+scale5/block3/b/gamma:0
+scale5/block3/b/moving_mean:0
+scale5/block3/b/moving_variance:0
+scale5/block3/c/weights:0
+scale5/block3/c/beta:0
+scale5/block3/c/gamma:0
+scale5/block3/c/moving_mean:0
+scale5/block3/c/moving_variance:0
+"""
+    vars_all = tf.all_variables()
+    vars_to_restore = vars_all
+    saver = tf.train.Saver(vars_to_restore)
+    sess = tf.Session()
+    sess.run(tf.initialize_all_variables())
+    saver.restore(sess, 'data/tensorflow-resnet-pretrained/' + checkpoint_fn(layers))
+    saver.save(sess, checkpoint_fn(layers))
+
 
 def main(_):
     img = load_image("data/cat.jpg")
@@ -326,7 +630,8 @@ def main(_):
         g = tf.Graph()
         with g.as_default():
             print "CONVERT", layers
-            convert(g, img, img_p, layers)
+            # convert(g, img, img_p, layers)
+            truncate_layer(g, layers)
 
 
 if __name__ == '__main__':
